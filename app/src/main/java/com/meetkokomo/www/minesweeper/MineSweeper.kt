@@ -27,20 +27,33 @@ class MineSweeper {
         }
     }
 
+    fun runTest(){
+        board.printBoard()
+        board.click(0,0)
+        board.printBoard()
+        board.click(0,1)
+        board.printBoard()
+        board.click(1,0)
+        board.printBoard()
+        board.click(1,1)
+        board.printBoard()
+    }
+
 }
 
 class Board (numRow : Int, numCol : Int) {
 
     val ROW : Int
     val COL : Int
-    val MINE_CELL = -1
+    val MINE_CELL = 9
+    val MINE_CELL_PRESSED = -1
 
     var data : IntArray
 
     init {
         ROW = numRow
         COL = numCol
-        data = IntArray ( numRow*numCol , { _ -> 0})
+        data = IntArray ( numRow*numCol , { _ -> 10})
     }
 
     fun placeMine ( mine : Int ) : Boolean {
@@ -50,7 +63,6 @@ class Board (numRow : Int, numCol : Int) {
         if (data[mine] != MINE_CELL){
             data[mine] = MINE_CELL
             fillNeighbors(mine)
-            printBoard()
             minePlaced = true
         }
 
@@ -73,44 +85,67 @@ class Board (numRow : Int, numCol : Int) {
     }
 
     fun valid (col : Int, row : Int) : Boolean {
-        var isValid : Boolean = false
-
-        if(col < COL && col >= 0 && row < ROW && row >= 0)
-            isValid = true
-
-        return isValid
+        return (col < COL && col >= 0 && row < ROW && row >= 0)
     }
 
     fun updateNeighbor (col : Int, row : Int) {
 
         val valid = valid(col, row)
-        val position : Int = (row * COL) + col
+        if(valid == true) {
+            val element: Int = getElementAt(col, row)
 
-        if(valid == true && data[position] != MINE_CELL) {
-            data[position] ++
+            if (element != MINE_CELL) {
+                setElement(element + 1, col, row)
+            }
         }
 
     }
 
+    fun click (col : Int, row : Int){
+        val element = getElementAt(col, row)
+
+        if(element >= MINE_CELL){
+            setElement(element-10, col, row)
+        }
+    }
+
+    fun getElementAt (col : Int, row: Int) : Int {
+        return data [(row * COL) +  col]
+    }
+
+    fun setElement (value: Int, col: Int, row: Int){
+        if( valid(col, row)){
+            data [(row * COL) +  col] = value;
+        }
+    }
+
     fun printBoard() {
-        var nRow: String = ""
+        var nRow : String = ""
+        var cCount : Int = 0
 
-        for ((index, value) in data.withIndex()) {
-
-            if (index >= COL) {
-               if (index % COL == 0)
-                    nRow += "\n"
+        for (element in data){
+            if(element >= MINE_CELL){
+                nRow += " 0 "
+            }
+            else
+            {
+                if(element == MINE_CELL_PRESSED){
+                    nRow += " X "
+                }
+                else{
+                    nRow += " " + element + " "
+                }
             }
 
-            if (value == -1)
-                nRow += "" + value + " "
-            else
-                nRow += " " + value + " "
+            cCount++
+
+            if(cCount == COL){
+                nRow += "\n"
+                cCount = 0
+            }
 
         }
-
         Log.d("Board", nRow)
-
     }
 
 }
