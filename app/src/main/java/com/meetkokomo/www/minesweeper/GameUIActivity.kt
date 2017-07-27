@@ -67,9 +67,9 @@ class GameUIActivity : AppCompatActivity() {
             button.text = game.board.click(button.c, button.r).toString()
             game.board.printBoard()
             if(game.hasGameEnded())
-                Log.d("UI", "You Win")
+                alertEndGame("You Won!")
             else if(game.hasMineBeenPressed()) {
-                alertEndGame()
+                alertEndGame("You Lost :(")
             }
             button.isClickable = false
             button.setBackgroundColor(Color.GRAY)
@@ -78,8 +78,8 @@ class GameUIActivity : AppCompatActivity() {
         return button
     }
 
-    fun alertEndGame(){
-        alert ("You lost"){
+    fun alertEndGame(s : String){
+        alert (s){
             positiveButton("Ok"){
                 finish()
             }

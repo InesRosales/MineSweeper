@@ -52,24 +52,6 @@ class MineSweeper (col: Int, row: Int, mines: Int) : BoardListener { //TODO remo
         return lose
     }
 
-    fun runGame(){
-        while (!win && !lose){
-            board.printBoard()
-
-        }
-
-        if(lose){
-            Log.d("Board", "You Lost :(")
-        }
-        else if(win){
-            Log.d("Board", "You won YAY!")
-        }
-        else{
-            Log.d("Board", "There's something really wrong here")
-        }
-    }
-
-
 }
 
 class Board (numRow : Int, numCol : Int, maxMines : Int, bListener : BoardListener) {
@@ -161,7 +143,18 @@ class Board (numRow : Int, numCol : Int, maxMines : Int, bListener : BoardListen
             expansion(col, row)
         }
 
+        if(checkForEndGame())
+            listener.gameEnded()
+
         return getElementAt(col, row)
+    }
+
+    fun checkForEndGame() : Boolean{
+        for(element in data){
+            if(element > MINE_CELL)
+                return false
+        }
+        return true
     }
 
     fun expansion (col : Int, row: Int){
@@ -241,7 +234,8 @@ class Board (numRow : Int, numCol : Int, maxMines : Int, bListener : BoardListen
                     nRow += "\n"
             }
             if(value >= MINE_CELL) {
-                nRow += "  0 " //TODO change here to 0
+                nRow += "  " + value + " "
+                //nRow += "  0 " //TODO change here to 0
             }
             else {
                 if (value == MINE_CELL_PRESSED)
