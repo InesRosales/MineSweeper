@@ -1,63 +1,110 @@
 package com.meetkokomo.www.minesweeper
 
+import android.app.Activity
+import android.content.Context
 import android.util.Log
-import java.util.Random
-import java.util.Stack
-
+import org.jetbrains.anko.*
+import java.util.*
 
 
 /**
  * Created by morningstar on 7/22/17.
  */
 
-class MineSweeper {
+interface BoardListener{
+    fun minePressed()
+    fun gameEnded()
+}
 
-    val MAX_MINES : Int = 2
-    val ROW : Int = 8
-    val COL : Int = 8
 
-    var placedMines : Int  = 0
-    var mineGenerator = MineGenerator (ROW * COL)
-    var board = Board(ROW, COL)
+class MineSweeper (col: Int, row: Int, mines: Int) : BoardListener { //TODO remove activity parameter
+
+    var col : Int = 0
+    var row : Int = 0
+    var mines : Int = 0
+
+    var win : Boolean = false
+    var lose : Boolean = false
+
+    var board : Board
 
     init {
-        while (placedMines < MAX_MINES) {
-            var mine = mineGenerator.getMine()
-            if(board.placeMine(mine)){
-                placedMines++
-            }
+        this.col = col
+        this.row = row
+        this.mines = mines
+        board  = Board(row, col, mines, this)
+        board.fillBoard()
+        board.printBoard()
+    }
+
+    override fun minePressed(){
+        lose = true
+    }
+
+    override fun gameEnded() {
+        win = true
+    }
+
+    fun hasGameEnded() : Boolean{
+        return win
+    }
+    fun hasMineBeenPressed() : Boolean{
+        return lose
+    }
+
+    fun runGame(){
+        while (!win && !lose){
+            board.printBoard()
+
+        }
+
+        if(lose){
+            Log.d("Board", "You Lost :(")
+        }
+        else if(win){
+            Log.d("Board", "You won YAY!")
+        }
+        else{
+            Log.d("Board", "There's something really wrong here")
         }
     }
 
-    fun runTest(){
-        board.printBoard()
-        board.click(0,0)
-        board.printBoard()
-        board.click(0,1)
-        board.printBoard()
-        board.click(1,0)
-        board.printBoard()
-        board.click(1,1)
-        board.printBoard()
-    }
 
 }
 
-class Board (numRow : Int, numCol : Int) {
+class Board (numRow : Int, numCol : Int, maxMines : Int, bListener : BoardListener) {
 
     val ROW : Int
     val COL : Int
+    val MAX_MINES : Int
+
     val MINE_CELL = 9
     val EMPTY_CELL = 10
     val MINE_CELL_PRESSED = -1
     val EMPTY_CELL_PRESSED = 0
+    val listener : BoardListener
 
     var data : IntArray
 
     init {
         ROW = numRow
         COL = numCol
+        MAX_MINES = maxMines
+        listener = bListener
         data = IntArray ( numRow*numCol , { _ -> 10})
+    }
+
+    fun fillBoard(){
+
+        var placedMines : Int  = 0
+        var mineGenerator = MineGenerator (ROW * COL)
+
+        while (placedMines < MAX_MINES) {
+            var mine = mineGenerator.getMine()
+            if(placeMine(mine)){
+                placedMines++
+            }
+        }
     }
 
     fun placeMine ( mine : Int ) : Boolean {
@@ -104,15 +151,17 @@ class Board (numRow : Int, numCol : Int) {
 
     }
 
-    fun click (col : Int, row : Int){
+    fun click (col : Int, row : Int) : Int{
         val element = getElementAt(col, row)
 
         if(isMine(element)){
-            Log.d("Board", "GAME OVER")
+            listener.minePressed()
         }
         else if (element >= MINE_CELL){
             expansion(col, row)
         }
+
+        return getElementAt(col, row)
     }
 
     fun expansion (col : Int, row: Int){
@@ -208,6 +257,7 @@ class Board (numRow : Int, numCol : Int) {
     }
 
 }
+
 
 class MineGenerator (length : Int) {
 

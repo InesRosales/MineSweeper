@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">MineSweeper</string>
+    <string name="dialog_new_game">Select your game</string>
+    <string name="dialog_new_game_easy">Easy game: 8 x 8 with 10 mines</string>
+    <string name="dialog_new_game_intermediate">Intermediate: 16 x 16 with 40 mines</string>
+    <string name="dialog_new_game_hard">Hard: 16 x 30 with 99 mines</string>
+    <string name="dialog_new_game_custom">Custom: </string>
+    <string name="dialog_button_new_game">Start</string>
 </resources>
