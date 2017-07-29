@@ -1,17 +1,17 @@
 package com.meetkokomo.www.minesweeper
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.view.Gravity
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.GridLayout
-import android.widget.LinearLayout
 import org.jetbrains.anko.*
+import android.graphics.Point
+import android.view.ViewGroup
+import kotlinx.android.synthetic.main.activity_game_ui.*
+
+
 
 class GameUIActivity : AppCompatActivity() {
 
@@ -26,6 +26,30 @@ class GameUIActivity : AppCompatActivity() {
 
         var game = MineSweeper(col, row, mines)
 
+        ui_grid_layout.columnCount = col
+        ui_grid_layout.rowCount = row
+        val screenWidth = getScreenWidth()
+        val cellWidth = screenWidth / col
+        val margin = cellWidth / col
+
+        var r : Int = 0
+        while (r < row){
+            var c : Int = 0
+            while(c < col){
+                ui_grid_layout.addView(createButton(c, r, game, this))
+                c++
+            }
+            r++
+        }
+
+        var p : ViewGroup.LayoutParams
+        for (i in 0..ui_grid_layout.getChildCount() - 1) {
+            p = ui_grid_layout.getChildAt(i).layoutParams
+            p.width = cellWidth
+            p.height = cellWidth
+        }
+
+        /*
         var gLayout : GridLayout = GridLayout(this)
         gLayout.columnCount = col
         gLayout.rowCount = row
@@ -47,8 +71,16 @@ class GameUIActivity : AppCompatActivity() {
             }
             r++
         }
-
         setContentView(gLayout)
+*/
+
+    }
+
+    fun getScreenWidth(): Int {
+        val display = windowManager.defaultDisplay
+        val size = Point()
+        display.getSize(size)
+        return size.x
     }
 
     fun createButton(c: Int, r: Int, game: MineSweeper, context: Context?) : GridButton{
@@ -56,30 +88,31 @@ class GameUIActivity : AppCompatActivity() {
 
         button.text = " "
 
-        val param = GridLayout.LayoutParams()
-        param.height = 55 //GridLayout.LayoutParams.WRAP_CONTENT
-        param.width = 55 //GridLayout.LayoutParams.WRAP_CONTENT TODO make dimentions calculation
-        param.columnSpec = GridLayout.spec(c)
-        param.rowSpec = GridLayout.spec(r)
-        button.layoutParams = param
-
         button.setOnClickListener {
             button.text = game.board.click(button.c, button.r).toString()
             game.board.printBoard()
             if(game.hasGameEnded())
-                alertEndGame("You Won!")
+                alertWinGame()
             else if(game.hasMineBeenPressed()) {
-                alertEndGame("You Lost :(")
+                alertEndGame()
             }
             button.isClickable = false
-            button.setBackgroundColor(Color.GRAY)
+            button.setBackgroundColor(Color.LTGRAY)
         }
 
         return button
     }
 
-    fun alertEndGame(s : String){
-        alert (s){
+    fun alertWinGame(){
+        alert ("You Won!"){
+            positiveButton("Ok"){
+                finish()
+            }
+        }
+    }
+
+    fun alertEndGame(){
+        alert ("You lost"){
             positiveButton("Ok"){
                 finish()
             }
