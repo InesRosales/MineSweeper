@@ -1,9 +1,6 @@
 package com.meetkokomo.www.minesweeper
 
-import android.app.Activity
-import android.content.Context
 import android.util.Log
-import org.jetbrains.anko.*
 import java.util.*
 
 
@@ -61,10 +58,11 @@ class Board (numRow : Int, numCol : Int, maxMines : Int, bListener : BoardListen
     val MAX_MINES : Int
 
     val MINE_CELL = 9
-    val EMPTY_CELL = 10
     val MINE_CELL_PRESSED = -1
     val EMPTY_CELL_PRESSED = 0
     val listener : BoardListener
+
+    var expansionElements: Stack<Int>
 
     var data : IntArray
 
@@ -74,6 +72,7 @@ class Board (numRow : Int, numCol : Int, maxMines : Int, bListener : BoardListen
         MAX_MINES = maxMines
         listener = bListener
         data = IntArray ( numRow*numCol , { _ -> 10})
+        expansionElements = Stack <Int>()
     }
 
     fun fillBoard(){
@@ -161,6 +160,7 @@ class Board (numRow : Int, numCol : Int, maxMines : Int, bListener : BoardListen
 
         var stack = Stack<Int> ()
 
+        expansionElements.clear()
         stack.push((row * COL) +  col)
 
         while (!stack.empty()){
@@ -172,6 +172,7 @@ class Board (numRow : Int, numCol : Int, maxMines : Int, bListener : BoardListen
             if(data[temp] == 10){
 
                 data[temp] = 0
+                expansionElements.push(temp)
 
                 if (isValid(col-1, row-1)) {
                     stack.push(((row - 1) * COL) + (col - 1))
@@ -207,13 +208,23 @@ class Board (numRow : Int, numCol : Int, maxMines : Int, bListener : BoardListen
             }
             else if (data[temp] > 10){
                 data[temp] -= 10
+                expansionElements.push(temp)
             }
         }
 
     }
 
+    fun getExpansion (): Stack<Int>{
+        return expansionElements
+    }
+
+
     fun isMine(element : Int) : Boolean {
         return (element == MINE_CELL)
+    }
+
+    fun getElementAt(pos : Int) : Int{
+        return data[pos]
     }
 
     fun getElementAt (col : Int, row: Int) : Int {

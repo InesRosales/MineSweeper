@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.GridLayout
 import org.jetbrains.anko.*
 import android.graphics.Point
+import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.activity_game_ui.*
 
@@ -49,31 +50,6 @@ class GameUIActivity : AppCompatActivity() {
             p.height = cellWidth
         }
 
-        /*
-        var gLayout : GridLayout = GridLayout(this)
-        gLayout.columnCount = col
-        gLayout.rowCount = row
-
-        val param = GridLayout.LayoutParams()
-
-        param.height = GridLayout.LayoutParams.WRAP_CONTENT
-        param.width = GridLayout.LayoutParams.MATCH_PARENT
-
-        gLayout.layoutParams = param
-
-        var r : Int = 0
-
-        while (r < row){
-            var c : Int = 0
-            while(c < col){
-                gLayout.addView(createButton(c, r, game, this))
-                c++
-            }
-            r++
-        }
-        setContentView(gLayout)
-*/
-
     }
 
     fun getScreenWidth(): Int {
@@ -89,18 +65,50 @@ class GameUIActivity : AppCompatActivity() {
         button.text = " "
 
         button.setOnClickListener {
-            button.text = game.board.click(button.c, button.r).toString()
+
+            val value = game.board.click(button.c, button.r)
             game.board.printBoard()
             if(game.hasGameEnded())
                 alertWinGame()
             else if(game.hasMineBeenPressed()) {
                 alertEndGame()
             }
-            button.isClickable = false
-            button.setBackgroundColor(Color.LTGRAY)
+
+            if(value == 0){
+
+                var elements = game.board.getExpansion()
+                var ePosition : Int
+                var eText : Int
+
+                while(!elements.empty()){
+
+                    ePosition = elements.pop()
+                    eText = game.board.getElementAt(ePosition)
+
+                    val v = ui_grid_layout.getChildAt(ePosition) as View
+                    if (v is Button) {
+                        deshabilitateButton(v)
+                        if(eText != 0)
+                            v.text = eText.toString()
+                    }
+
+
+                }
+
+            }
+            else {
+                button.text = value.toString()
+            }
+
+            deshabilitateButton(button)
         }
 
         return button
+    }
+
+    fun deshabilitateButton(button : View){
+        button.isClickable = false
+        button.setBackgroundColor(Color.LTGRAY)
     }
 
     fun alertWinGame(){
